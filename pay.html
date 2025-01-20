@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Successful</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 600px;
+            margin: auto;
+        }
+        h1 {
+            color: #4caf50;
+        }
+        .details {
+            font-size: 18px;
+            margin-top: 20px;
+            text-align: left;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        .details p {
+            margin: 8px 0;
+        }
+        .button {
+            margin-top: 30px;
+            padding: 12px 25px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Payment Successful!</h1>
+        <div class="details" id="payment-details">
+            <!-- Informasi pembayaran akan ditampilkan di sini -->
+        </div>
+        <button class="button" onclick="window.location.href='index.html'">Go to Home</button>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        // Mengambil data pembayaran dari localStorage
+        const paymentDetails = JSON.parse(localStorage.getItem('paymentDetails'));
+
+        if (paymentDetails) {
+            const paymentInfoElement = document.getElementById('payment-details');
+            
+            // Menampilkan rincian pembayaran
+            paymentInfoElement.innerHTML = `
+                <h3>Payment Summary</h3>
+                <p><strong>Name:</strong> ${paymentDetails.name}</p>
+                <p><strong>Email:</strong> ${paymentDetails.email}</p>
+                <p><strong>Address:</strong> ${paymentDetails.address}</p>
+                <p><strong>Payment Method:</strong> ${paymentDetails.paymentMethod}</p>
+                <p><strong>Total Amount:</strong> Rp.${paymentDetails.totalAmount}</p>
+            `;
+        } else {
+            alert("No payment details found.");
+        }
+      });
+    </script>
+
+</body>
+</html>

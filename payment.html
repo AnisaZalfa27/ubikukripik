@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Gateway</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f9;
+        }
+        .payment-container {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            text-align: center;
+        }
+        .payment-container h2 {
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .form-group textarea {
+            resize: none;
+            height: 80px;
+        }
+        .payment-method {
+            margin-bottom: 15px;
+        }
+        .payment-method label {
+            font-weight: bold;
+        }
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .payment-options {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .payment-options img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            cursor: pointer;
+            transition: transform 0.2s;
+            padding: 5px;
+        }
+        .payment-options img:hover {
+            transform: scale(1.1);
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    
+    
+    </style>
+</head>
+<body>     
+        <div class="payment-container">
+            <h2>Payment Gateway</h2>
+            <form id="paymentForm" action="pay.html" method="post">
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" name="name" placeholder="Enter your name" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Email:</label>
+                    <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="address">Address:</label>
+                    <textarea id="address" name="address" placeholder="Enter your address" required></textarea>
+                </div>
+        
+                <h3>Products</h3>
+                <ul id="product-list"></ul>
+        
+                <div class="form-group">
+                    <label for="total">Total Pembelian:</label>
+                    <input type="text" id="total" name="total" disabled>
+                </div>
+        
+                <div class="payment-options">
+                    <img src="images/new-gopay-logo-copy.png" alt="GoPay" id="gopay" data-method="gopay">
+                    <img src="images/BCA_logo_Bank_Central_Asia.png" alt="Bank BCA" id="bca" data-method="bca">
+                    <img src="images/Dana.png" alt="Dana" id="dana" data-method="dana">
+                </div>
+        
+                <div id="payment-info"></div>
+        
+                <button type="submit" id="payButton">Pay Now</button>
+            </form>
+        </div>
+        
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const cartData = JSON.parse(localStorage.getItem('cartData')) || [];
+    let total = 0;
+    
+    // Menampilkan daftar produk yang dibeli
+    const productList = document.getElementById('product-list');
+    cartData.forEach(item => {
+        const productItem = document.createElement('div');
+        productList.appendChild(productItem);
+        total += item.price * item.quantity;
+    });
+
+    // Menampilkan total pembelian
+    document.getElementById('total').value = `Rp.${total}`;
+
+    let selectedPaymentMethod = '';
+    const paymentInfo = document.getElementById('payment-info');
+
+    // Pilih metode pembayaran
+    document.getElementById('gopay').addEventListener('click', function() {
+        selectedPaymentMethod = 'GoPay';
+        paymentInfo.textContent = `Please transfer to this GoPay number: 089523341723`;
+    });
+    document.getElementById('bca').addEventListener('click', function() {
+        selectedPaymentMethod = 'BCA';
+        paymentInfo.textContent = `Please transfer to this BCA account number: 31883746`;
+    });
+    document.getElementById('dana').addEventListener('click', function() {
+        selectedPaymentMethod = 'Dana';
+        paymentInfo.textContent = `Please transfer to this Dana number: 089523341723`;
+    });
+
+    // Menyimpan data pembayaran dan mengarahkan ke halaman success
+    document.getElementById('paymentForm').addEventListener('submit', function(event) {
+        event.preventDefault();  // Mencegah pengiriman langsung form
+
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        const address = document.getElementById('address').value;
+
+        if (!selectedPaymentMethod) {
+            alert("Please choose a payment method.");
+            return;
+        }
+
+        // Menyimpan data pembayaran di localStorage
+        localStorage.setItem('paymentDetails', JSON.stringify({
+            name: name,
+            email: email,
+            address: address,
+            totalAmount: total,
+            paymentMethod: selectedPaymentMethod
+        }));
+
+        // Redirect ke payment-successful.html
+        window.location.href = 'pay.html';
+    });
+});
+
+function sendEmail(paymentDetails) {
+  const templateParams = {
+      name: paymentDetails.name,
+      email: paymentDetails.email, // Email customer
+      address: paymentDetails.address,
+      paymentMethod: paymentDetails.paymentMethod,
+      totalAmount: paymentDetails.totalAmount,
+  };
+
+  // Kirim email menggunakan emailjs
+  emailjs.send("service_cdizmdk", "template_btqkyrb", templateParams)
+      .then(function(response) {
+          console.log("Email sent successfully", response);
+      }, function(error) {
+          console.log("Error sending email", error);
+      });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const paymentDetails = JSON.parse(localStorage.getItem('paymentDetails'));
+
+  if (paymentDetails) {
+      const paymentInfoElement = document.getElementById('payment-details');
+      paymentInfoElement.innerHTML = `
+          <p><strong>Name:</strong> ${paymentDetails.name}</p>
+          <p><strong>Email:</strong> ${paymentDetails.email}</p>
+          <p><strong>Address:</strong> ${paymentDetails.address}</p>
+          <p><strong>Payment Method:</strong> ${paymentDetails.paymentMethod}</p>
+          <p><strong>Total Amount:</strong> Rp.${paymentDetails.totalAmount}</p>
+          <p><strong>Payment Confirmation:</strong> Your payment has been processed successfully.</p>
+      `;
+
+      // Define template parameters to send to EmailJS
+      const templateParams = {
+          name: paymentDetails.name,
+          email: paymentDetails.email,
+          address: paymentDetails.address,
+          paymentMethod: paymentDetails.paymentMethod,
+          totalAmount: paymentDetails.totalAmount
+      };
+
+      // Send email using EmailJS
+      emailjs.send("your_service_id", "your_template_id", templateParams)
+        .then(function(response) {
+            console.log("Email sent successfully", response);
+        }, function(error) {
+            console.log("Error sending email", error);
+        });
+
+  } else {
+      alert("No payment details found.");
+  }
+});
+
+   </script>
+        
+</body>
+</html>

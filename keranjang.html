@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Keranjang</title>
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+  <style>
+    table { background-color: #5D3C64; color: white; }
+    .btn-edit, .btn-delete { font-size: 14px; }
+    .btn-checkout { background-color: #28a745; color: white; }
+    .btn-checkout:hover { background-color: #218838; }
+  </style>
+</head>
+<body>
+  <div class="container my-4">
+    <h2 class="text-center">Daftar Pesanan</h2>
+    <table class="table table-bordered text-center">
+      <thead>
+        <tr>
+          <th>no</th>
+          <th>Nama Menu</th>
+          <th>Harga</th>
+          <th>Jumlah</th>
+          <th>Total</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="order-table">
+        <tr>
+          <td colspan="6">Tidak ada pesanan</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="text-center">
+      <a href="payment.html">
+        <button class="btn btn-success btn-checkout" id="checkout-btn" disabled>Checkout</button>
+    </a>
+    
+    </div>
+  </div>
+
+  <script>
+  const orderTable = document.getElementById('order-table');
+  const checkoutBtn = document.getElementById('checkout-btn');
+  let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+  function renderCart() {
+    if (cart.length === 0) {
+      orderTable.innerHTML = '<tr><td colspan="6">Tidak ada pesanan</td></tr>';
+      checkoutBtn.disabled = true;
+      return;
+    }
+
+    checkoutBtn.disabled = false;
+    orderTable.innerHTML = cart.map((item, index) => `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${item.name}</td>
+        <td>Rp.${item.price}</td>
+        <td><input type="number" min="1" value="${item.quantity}" data-index="${index}" class="quantity-input"></td>
+        <td>Rp.${item.price * item.quantity}</td>
+        <td>
+          <button class="btn btn-danger btn-delete" data-index="${index}">Hapus</button>
+        </td>
+      </tr>
+    `).join('');
+
+    document.querySelectorAll('.quantity-input').forEach(input => {
+      input.addEventListener('change', e => {
+        const index = e.target.getAttribute('data-index');
+        cart[index].quantity = parseInt(e.target.value) || 1;
+        localStorage.setItem('cart', JSON.stringify(cart));
+        renderCart();
+      });
+    });
+
+    document.querySelectorAll('.btn-delete').forEach(button => {
+      button.addEventListener('click', e => {
+        const index = e.target.getAttribute('data-index');
+        cart.splice(index, 1);
+        localStorage.setItem('cart', JSON.stringify(cart));
+        renderCart();
+      });
+    });
+  }
+
+  checkoutBtn.addEventListener('click', () => {
+    // Simpan total dan produk ke localStorage untuk dibawa ke halaman pembayaran
+    localStorage.setItem('cartData', JSON.stringify(cart));
+    window.location.href = "payment.html"; // Pindah ke halaman pembayaran
+  });
+
+  renderCart();
+
+  </script>
+</body>
+</html>
